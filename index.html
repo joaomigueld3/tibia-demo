@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tibia Browser Demo — Rookgaard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="client-frame">
+      <header id="top-bar" class="bevel-panel">
+        <div class="top-left">
+          <span class="client-title">Tibia Browser Demo</span>
+          <span class="divider">|</span>
+          <span id="floor-label">Surface (z=0)</span>
+          <span id="coords-label" class="muted">14, 14</span>
+          <span id="pz-badge" class="pz-pill">Protection Zone</span>
+        </div>
+        <div class="top-actions">
+          <button id="sfx-toggle" type="button" class="retro-btn active">SFX: ON</button>
+          <button id="help-toggle" type="button" class="retro-btn">Controls</button>
+        </div>
+      </header>
+
+      <div id="main-area">
+        <section id="left-stage">
+          <div id="viewport-wrapper" class="bevel-inset">
+            <canvas id="game-canvas" width="480" height="352"></canvas>
+          </div>
+
+          <div id="hotkey-bar" class="bevel-panel">
+            <button id="hk-exura" type="button" class="retro-btn hotkey-btn" title="Cast Light Healing (20 Mana)">
+              <span class="hk-key">F1</span> Exura
+            </button>
+            <button id="hk-flam" type="button" class="retro-btn hotkey-btn" title="Cast Fire Wave (25 Mana)">
+              <span class="hk-key">F2</span> Exevo Flam Hur
+            </button>
+            <button id="hk-potion" type="button" class="retro-btn hotkey-btn" title="Drink Health Potion">
+              <span class="hk-key">F3</span> Health Potion
+            </button>
+            <button id="hk-look" type="button" class="retro-btn hotkey-btn" title="Click any tile to inspect (or Shift+Click / Right-Click)">
+              Look
+            </button>
+          </div>
+
+          <div id="console-panel" class="bevel-panel">
+            <div class="console-header">Server Log &amp; Default Chat</div>
+            <div id="console-log" class="bevel-inset" aria-live="polite"></div>
+            <form id="chat-form" autocomplete="off">
+              <input
+                id="chat-input"
+                type="text"
+                maxlength="120"
+                placeholder='Press Enter to chat, talk to Cipfried ("hi", "heal"), or cast ("exura")...'
+              />
+              <button type="submit" class="retro-btn">Say</button>
+            </form>
+          </div>
+        </section>
+
+        <aside id="sidebar">
+          <div class="side-card bevel-panel minimap-card">
+            <div class="panel-title">Minimap</div>
+            <div class="minimap-row">
+              <div class="bevel-inset minimap-wrap">
+                <canvas id="minimap-canvas" width="112" height="112"></canvas>
+              </div>
+              <div class="minimap-legend">
+                <div><span class="dot dot-player"></span> You</div>
+                <div><span class="dot dot-npc"></span> NPC</div>
+                <div><span class="dot dot-mob"></span> Monster</div>
+                <div><span class="dot dot-stairs"></span> Grate/Ladder</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="side-card bevel-panel">
+            <div class="panel-title">
+              <span>Status &amp; Skills</span>
+              <span id="level-text" class="accent-gold">Lvl 1</span>
+            </div>
+
+            <div class="bar-row">
+              <span class="bar-label">HP</span>
+              <div class="bar-track bevel-inset">
+                <div id="hp-fill" class="bar-fill hp-fill" style="width: 100%"></div>
+                <span id="hp-text" class="bar-value">150/150</span>
+              </div>
+            </div>
+
+            <div class="bar-row">
+              <span class="bar-label">MP</span>
+              <div class="bar-track bevel-inset">
+                <div id="mana-fill" class="bar-fill mana-fill" style="width: 100%"></div>
+                <span id="mana-text" class="bar-value">55/55</span>
+              </div>
+            </div>
+
+            <div class="bar-row">
+              <span class="bar-label">XP</span>
+              <div class="bar-track bevel-inset">
+                <div id="xp-fill" class="bar-fill xp-fill" style="width: 0%"></div>
+                <span id="xp-text" class="bar-value">0/35 XP</span>
+              </div>
+            </div>
+
+            <div class="stats-meta">
+              <span id="stats-summary">Atk 7 · Def 18</span>
+              <span id="fed-status" class="status-fed">Fed (15)</span>
+            </div>
+
+            <div id="equip-grid"></div>
+
+            <div class="stance-row">
+              <button type="button" class="retro-btn stance-btn" data-stance="offensive">Offensive</button>
+              <button type="button" class="retro-btn stance-btn active" data-stance="balanced">Balanced</button>
+              <button type="button" class="retro-btn stance-btn" data-stance="defensive">Defensive</button>
+            </div>
+          </div>
+
+          <div class="side-card bevel-panel battle-card">
+            <div class="panel-title">Battle List</div>
+            <div id="battle-list" class="bevel-inset"></div>
+          </div>
+
+          <div id="loot-panel" class="side-card bevel-panel hidden">
+            <div class="panel-title">
+              <span id="loot-title">Loot</span>
+              <div class="loot-actions">
+                <button id="take-all-btn" type="button" class="retro-btn mini-btn">Take All</button>
+                <button id="close-loot-btn" type="button" class="retro-btn mini-btn">X</button>
+              </div>
+            </div>
+            <div id="loot-grid" class="slot-grid"></div>
+          </div>
+
+          <div class="side-card bevel-panel">
+            <div class="panel-title">Backpack</div>
+            <div id="backpack-grid" class="slot-grid"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div id="help-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-box bevel-panel">
+        <div class="panel-title">
+          <span>Rookgaard Controls &amp; Guide</span>
+          <button id="close-help-btn" type="button" class="retro-btn mini-btn">X</button>
+        </div>
+        <div class="modal-body">
+          <ul>
+            <li><strong>Walk:</strong> <code>WASD</code> / <code>Arrow Keys</code>, <code>Q/E/Z/C</code> (diagonals), or Left-Click ground tiles.</li>
+            <li><strong>Attack:</strong> Click a monster in the viewport or Battle List (<code>Esc</code> cancels target).</li>
+            <li><strong>Look / Inspect:</strong> <code>Right-Click</code> or <code>Shift + Left-Click</code> (or toggle <em>Look</em>).</li>
+            <li><strong>Loot &amp; Chests:</strong> Click an adjacent corpse/chest or press <code>Space</code> to quick-loot.</li>
+            <li><strong>Backpack:</strong> Click Food to eat, Potions to drink, or Gear (like Short Sword) to equip.</li>
+            <li><strong>Spells:</strong> <code>F1</code> (<em>exura</em>) heals HP; <code>F2</code> (<em>exevo flam hur</em>) blasts fire forward.</li>
+            <li><strong>NPCs &amp; Sewer:</strong> Say <code>hi</code> or <code>heal</code> near Monk Cipfried in the Temple. Step onto or click the Sewer Grate east of town to enter the Rat Sewer!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
